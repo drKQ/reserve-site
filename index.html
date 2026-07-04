@@ -3,37 +3,356 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RESERVE</title>
+<title>RESERVE — Your metabolism, made visible</title>
+<meta name="description" content="RESERVE is a metabolic HUD for iPhone. A living orb shows your fuel — glycogen in, energy out — in real time. Six goal modes, radical kindness, no account, no ads. Free on the App Store.">
+<link rel="icon" type="image/png" href="./assets/favicon.png">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RESERVE — Your metabolism, made visible">
+<meta property="og:description" content="A living orb shows your fuel in real time. Six goal modes. No shame, ever. Free on the App Store — no account, no ads.">
+<meta property="og:image" content="https://drkq.github.io/reserve-site/assets/og.jpg">
+<meta property="og:url" content="https://drkq.github.io/reserve-site/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RESERVE — Your metabolism, made visible">
+<meta name="twitter:description" content="A living orb shows your fuel in real time. Six goal modes. No shame, ever. Free — no account, no ads.">
+<meta name="twitter:image" content="https://drkq.github.io/reserve-site/assets/og.jpg">
 <style>
-  :root { --bg:#0b0a09; --ink:#f3ece2; --dim:#a89e90; --amber:#ff9933; --line:rgba(255,255,255,.10); }
-  * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; background:radial-gradient(120% 80% at 50% -10%, #1c1510 0%, var(--bg) 60%);
-         color:var(--ink); display:flex; align-items:center; justify-content:center;
-         font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,Segoe UI,Roboto,sans-serif;
-         -webkit-font-smoothing:antialiased; text-align:center; }
-  .wrap { max-width:560px; padding:48px 24px; }
-  .orb { width:120px; height:120px; margin:0 auto 28px; border-radius:50%;
-         background:radial-gradient(circle at 38% 32%, #ffc017 0%, #ff7a18 45%, #c0390a 100%);
-         box-shadow:0 0 60px rgba(255,140,40,.45), inset 0 -14px 30px rgba(0,0,0,.35); }
-  .eyebrow { font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.42em;
-             color:var(--amber); text-transform:uppercase; }
-  h1 { font-size:40px; letter-spacing:.12em; margin:12px 0 10px; }
-  p { color:var(--dim); margin:0 auto 32px; max-width:440px; }
-  .links a { display:inline-block; margin:6px; padding:12px 22px; border:1px solid var(--line);
-             border-radius:999px; color:var(--ink); text-decoration:none; font-size:15px; }
-  .links a:hover { border-color:var(--amber); color:var(--amber); }
+  :root {
+    --bg:#0b0a09; --bg2:#12100d; --card:#161310; --ink:#f3ece2; --dim:#a89e90; --faint:#6f675c;
+    --amber:#ff9933; --green:#4fd98a; --green-deep:#1f7a4d; --pink:#f4a7c3; --cyan:#7fd4f0; --violet:#b48cf2;
+    --line:rgba(255,255,255,.09);
+    --maxw:1080px;
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  a { color:inherit; }
+  img { max-width:100%; height:auto; display:block; }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  .eyebrow {
+    font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.38em; text-transform:uppercase; color:var(--green);
+  }
+  h2 { font-size:clamp(28px,4.2vw,44px); line-height:1.12; letter-spacing:-.015em; margin:14px 0 14px; font-weight:800; }
+  .lead { color:var(--dim); font-size:clamp(16px,1.9vw,19px); max-width:56ch; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    background:rgba(11,10,9,.72); border-bottom:1px solid var(--line);
+  }
+  .nav-in { max-width:var(--maxw); margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:22px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.14em; font-size:15px; text-decoration:none; }
+  .brand img { width:28px; height:28px; border-radius:7px; }
+  .nav-links { margin-left:auto; display:flex; gap:20px; align-items:center; }
+  .nav-links a { color:var(--dim); text-decoration:none; font-size:14.5px; }
+  .nav-links a:hover { color:var(--ink); }
+  .nav-cta {
+    color:#0b0a09 !important; background:var(--ink); border-radius:999px; padding:8px 16px; font-weight:700;
+  }
+  .nav-cta:hover { background:#fff; }
+  @media (max-width:720px){ .nav-links a:not(.nav-cta){ display:none; } }
+
+  /* ---------- hero ---------- */
+  header { position:relative; overflow:hidden; }
+  #orbCanvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .hero {
+    position:relative; display:grid; grid-template-columns:1.18fr .82fr; gap:48px; align-items:center;
+    padding:72px 24px 84px; max-width:var(--maxw); margin:0 auto;
+  }
+  .hero h1 { font-size:clamp(38px,5.4vw,62px); line-height:1.05; letter-spacing:-.02em; font-weight:850; margin:18px 0 20px; }
+  .hero h1 em { font-style:normal; color:var(--green); }
+  .hero .sub { color:var(--dim); font-size:clamp(17px,2vw,21px); max-width:46ch; margin-bottom:34px; }
+  .store-row { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .store-badge { display:inline-block; transition:transform .15s ease; }
+  .store-badge:hover { transform:scale(1.03); }
+  .free-note { color:var(--faint); font-size:14px; }
+  .free-note b { color:var(--dim); font-weight:600; }
+
+  .phone {
+    position:relative; border-radius:clamp(38px,4.4vw,54px); border:1px solid rgba(255,255,255,.16);
+    background:#000; padding:clamp(8px,1vw,12px);
+    box-shadow:0 30px 80px rgba(0,0,0,.55), 0 0 120px rgba(79,217,138,.10);
+    max-width:310px; margin:0 auto;
+  }
+  .phone img { border-radius:clamp(30px,3.6vw,44px); }
+  @media (max-width:880px){
+    .hero { grid-template-columns:1fr; padding-top:56px; min-height:0; text-align:center; }
+    .hero .sub { margin-inline:auto; }
+    .store-row { justify-content:center; }
+    .phone { max-width:280px; }
+  }
+
+  /* ---------- sections ---------- */
+  section { padding:96px 0; position:relative; }
+  section.alt { background:linear-gradient(180deg, var(--bg) 0%, var(--bg2) 18%, var(--bg2) 82%, var(--bg) 100%); }
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+  .split.rev > .txt { order:2; } .split.rev > .vis { order:1; }
+  @media (max-width:880px){
+    .split, .split.rev { grid-template-columns:1fr; gap:36px; }
+    .split.rev > .txt { order:1; } .split.rev > .vis { order:2; }
+  }
+  .pts { list-style:none; padding:0; margin:22px 0 0; display:grid; gap:14px; }
+  .pts li { display:flex; gap:12px; color:var(--dim); }
+  .pts li b { color:var(--ink); font-weight:650; }
+  .dot { flex:0 0 8px; width:8px; height:8px; border-radius:50%; margin-top:9px; background:var(--green); }
+  .dot.amber{ background:var(--amber);} .dot.pink{ background:var(--pink);} .dot.cyan{ background:var(--cyan);} .dot.violet{ background:var(--violet);}
+
+  /* honest band */
+  .honest { text-align:center; padding:110px 24px; }
+  .honest blockquote { font-size:clamp(26px,4vw,42px); font-weight:800; line-height:1.25; letter-spacing:-.015em; max-width:21ch; margin:18px auto; }
+  .honest blockquote span { color:var(--pink); }
+  .honest p { color:var(--dim); max-width:60ch; margin:0 auto; }
+
+  /* modes grid */
+  .modes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:36px; }
+  @media (max-width:880px){ .modes { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:540px){ .modes { grid-template-columns:1fr; } }
+  .mode {
+    background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px;
+    transition:transform .18s ease, border-color .18s ease;
+  }
+  .mode:hover { transform:translateY(-3px); border-color:rgba(255,255,255,.2); }
+  .mode h3 { font-size:16.5px; margin-bottom:6px; display:flex; align-items:center; gap:9px; }
+  .mode p { color:var(--dim); font-size:14.5px; }
+  .mode .tag { font:700 9.5px/1 ui-monospace,monospace; letter-spacing:.22em; padding:4px 8px; border-radius:999px; }
+  .tag.care { background:rgba(244,167,195,.14); color:var(--pink); }
+
+  /* everywhere grid */
+  .every { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:36px; }
+  @media (max-width:880px){ .every { grid-template-columns:repeat(2,1fr); } }
+  .ev { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px 20px; }
+  .ev .ic { font-size:26px; margin-bottom:10px; }
+  .ev h3 { font-size:15.5px; margin-bottom:5px; }
+  .ev p { color:var(--dim); font-size:13.5px; line-height:1.5; }
+
+  /* privacy band */
+  .privacy { text-align:center; }
+  .privacy .chips { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:26px; }
+  .chip { border:1px solid var(--line); border-radius:999px; padding:9px 18px; color:var(--dim); font-size:14px; }
+  .chip b { color:var(--green); font-weight:700; }
+
+  /* footer cta */
+  .final { text-align:center; padding:120px 24px 60px; position:relative; overflow:hidden; }
+  .final h2 { font-size:clamp(30px,5vw,52px); }
+  .final .tagline { color:var(--green); font:700 13px/1 ui-monospace,monospace; letter-spacing:.3em; text-transform:uppercase; margin-bottom:16px; }
+  footer { border-top:1px solid var(--line); padding:28px 24px 44px; }
+  .foot-in { max-width:var(--maxw); margin:0 auto; display:flex; gap:18px; flex-wrap:wrap; align-items:center; color:var(--faint); font-size:14px; }
+  .foot-in a { color:var(--dim); text-decoration:none; }
+  .foot-in a:hover { color:var(--ink); }
+  .foot-in .sp { margin-left:auto; }
+
+  /* reveal on scroll */
+  .rv { opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease; }
+  .rv.in { opacity:1; transform:none; }
+  @media (prefers-reduced-motion:reduce){
+    .rv { opacity:1; transform:none; transition:none; }
+    html { scroll-behavior:auto; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="orb"></div>
-  <div class="eyebrow">RESERVE</div>
-  <h1>RESERVE</h1>
-  <p>A living HUD of your metabolism — see your glycogen and fat reserves move in real time. Your data stays on your phone.</p>
-  <div class="links">
-    <a href="./privacy.html">Privacy Policy</a>
-    <a href="./support.html">Support</a>
+
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="#top"><img src="./assets/favicon.png" alt="" width="28" height="28">RESERVE</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#modes">Modes</a>
+      <a href="#everywhere">Everywhere</a>
+      <a href="./press.html">Press</a>
+      <a href="./support.html">Support</a>
+      <a class="nav-cta" href="https://apps.apple.com/app/id6772624785">Download</a>
+    </div>
   </div>
+</nav>
+
+<header id="top">
+  <canvas id="orbCanvas" aria-hidden="true"></canvas>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Reserve · Metabolic HUD</div>
+      <h1>Your metabolism, <em>made visible.</em></h1>
+      <p class="sub">Most health apps are a spreadsheet in disguise. RESERVE is a living orb — your body's fuel, draining and filling in real time. Eat, and it fills. Move, fast, sleep — and watch it burn.</p>
+      <div class="store-row">
+        <a class="store-badge" href="https://apps.apple.com/app/id6772624785" aria-label="Download on the App Store">
+          <svg width="180" height="60" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg" role="img">
+            <rect x="1" y="1" width="178" height="58" rx="12" fill="#000" stroke="#a6a6a6" stroke-width="1.4"/>
+            <g fill="#fff">
+              <path d="M37.4 30.6c0-3.6 2.9-5.3 3.1-5.4-1.7-2.5-4.3-2.8-5.3-2.8-2.2-.2-4.4 1.3-5.5 1.3-1.1 0-2.9-1.3-4.8-1.3-2.4 0-4.7 1.4-5.9 3.6-2.6 4.4-.7 11 1.8 14.6 1.2 1.8 2.7 3.7 4.6 3.6 1.8-.1 2.5-1.2 4.8-1.2s2.9 1.2 4.8 1.1c2-.1 3.3-1.8 4.5-3.6 1.4-2 2-4 2-4.1-.1 0-3.9-1.5-4.1-5.8zM33.7 19.8c1-1.2 1.7-2.9 1.5-4.6-1.4.1-3.2 1-4.2 2.2-.9 1-1.8 2.8-1.5 4.4 1.6.1 3.2-.8 4.2-2z"/>
+              <text x="52" y="24" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text',Helvetica,Arial,sans-serif" font-size="11" fill="#fff">Download on the</text>
+              <text x="52" y="44" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display',Helvetica,Arial,sans-serif" font-size="21" font-weight="600" fill="#fff">App Store</text>
+            </g>
+          </svg>
+        </a>
+        <div class="free-note"><b>Free.</b> No account. No ads.<br>No subscription required.</div>
+      </div>
+    </div>
+    <div class="phone rv"><img src="./assets/phone-orb.jpg" alt="RESERVE home screen: the glowing orb showing 1,949 kcal in reserve, burning fat" width="640" height="1391" fetchpriority="high"></div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap split">
+    <div class="txt rv">
+      <div class="eyebrow">The Orb</div>
+      <h2>One glance. Whole metabolism.</h2>
+      <p class="lead">Under the glass is your actual biology: the energy you've eaten, the energy you've burned, and the state your body is in right now.</p>
+      <ul class="pts">
+        <li><span class="dot"></span><div><b>Fuel states, live.</b> Watch yourself move from FED into BURNING FAT — the orb changes as your body does.</div></li>
+        <li><span class="dot amber"></span><div><b>Your real daily burn.</b> Not a generic formula — RESERVE measures how <i>your</i> body actually spends energy, week after week.</div></li>
+        <li><span class="dot cyan"></span><div><b>Everything counts.</b> Meals, water, walks, coffee, sleep, macros, supplements — logged in seconds, reflected instantly.</div></li>
+        <li><span class="dot violet"></span><div><b>It learns you.</b> Your staples, your patterns, your rhythm. The longer you use it, the more it speaks your language.</div></li>
+      </ul>
+    </div>
+    <div class="vis rv"><div class="phone"><img src="./assets/phone-history.jpg" alt="RESERVE history: honest weight trend and energy charts" width="640" height="805" loading="lazy"></div></div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="honest rv">
+    <div class="eyebrow" style="color:var(--pink)">Honest by design</div>
+    <blockquote>The kindest health app you've ever met. <span>No shame, ever.</span></blockquote>
+    <p>RESERVE never scolds, never nags, never punishes a weigh-in. When the scale goes up, it stays respectfully silent — because water masks change, and you deserve an app that knows the difference. It celebrates what's real and says nothing about the noise.</p>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="wrap">
+    <div class="split rev">
+      <div class="txt rv">
+        <div class="eyebrow" style="color:var(--pink)">Six modes</div>
+        <h2>A companion for every chapter.</h2>
+        <p class="lead">Bodies have seasons. RESERVE reshapes itself around your goal — including two care modes that hide weight and calorie counting entirely.</p>
+      </div>
+      <div class="vis rv"><div class="phone"><img src="./assets/phone-baby.jpg" alt="RESERVE pregnancy mode: the baby orb at week 27" width="640" height="1391" loading="lazy"></div></div>
+    </div>
+    <div class="modes">
+      <div class="mode rv"><h3>🔥 Cut</h3><p>Spend your reserve. Boss-fight weigh-ins, golden pounds, a gauge that burns toward every win.</p></div>
+      <div class="mode rv"><h3>⚖️ Maintain</h3><p>Hold the line with calm. Quiet coins for steady days — no drama, just consistency made visible.</p></div>
+      <div class="mode rv"><h3>💪 Bulk</h3><p>Fuel the build. Surplus tracking and protein focus, framed as growth — never guilt.</p></div>
+      <div class="mode rv"><h3>🧱 Recomp</h3><p>Change shape, not weight. The scale holding steady is the victory here, and RESERVE knows it.</p></div>
+      <div class="mode rv"><h3>🌿 Rehab <span class="tag care">CARE</span></h3><p>Recovering, healing, or rebuilding your relationship with food. No weight. No budgets. Just gentle nourishment.</p></div>
+      <div class="mode rv"><h3>🤰 Pregnancy <span class="tag care">CARE</span></h3><p>A full companion: your baby's growth week by week, nutrients, appointments, and zero diet pressure.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="everywhere">
+  <div class="wrap">
+    <div class="rv" style="text-align:center; max-width:640px; margin:0 auto;">
+      <div class="eyebrow" style="color:var(--cyan)">Everywhere</div>
+      <h2>Log it before the app even opens.</h2>
+      <p class="lead" style="margin:0 auto;">The fastest food log on iPhone — because most of the time you don't need the app at all.</p>
+    </div>
+    <div class="every">
+      <div class="ev rv"><div class="ic">🗣️</div><h3>Siri</h3><p>"Log a meal in Reserve." Done. Ask "how's my reserve?" and it answers from your live data.</p></div>
+      <div class="ev rv"><div class="ic">🏠</div><h3>Widgets</h3><p>Interactive Home Screen buttons log water and walks without launching anything.</p></div>
+      <div class="ev rv"><div class="ic">🎛️</div><h3>Control Center</h3><p>One swipe, one tap. Water logged. Works from the Action button too.</p></div>
+      <div class="ev rv"><div class="ic">⌚️</div><h3>Apple Watch</h3><p>Quick-log from your wrist and glance at your fuel state mid-walk.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div class="txt rv">
+      <div class="eyebrow" style="color:var(--violet)">Yours</div>
+      <h2>Make it yours.</h2>
+      <p class="lead">Earn living themes as you go — a synthwave cyberpunk city, a 1980s CRT, a soft pink calm. Every one rebuilds the entire app around your orb, with its own motion, sound, and signature effects.</p>
+      <ul class="pts">
+        <li><span class="dot violet"></span><div><b>Unlocked, not bought.</b> Themes are trophies. You earn them by showing up.</div></li>
+        <li><span class="dot cyan"></span><div><b>Built for everyone.</b> Full VoiceOver, charts you can <i>hear</i> (Audio Graphs), Dynamic Type — and six languages.</div></li>
+      </ul>
+    </div>
+    <div class="vis rv"><div class="phone"><img src="./assets/phone-cyber.jpg" alt="RESERVE cyberpunk synthwave theme with purple neon orb" width="640" height="1391" loading="lazy"></div></div>
+  </div>
+</section>
+
+<section class="alt privacy">
+  <div class="wrap rv">
+    <div class="eyebrow">Private by architecture</div>
+    <h2>Your body's data belongs to you.</h2>
+    <p class="lead" style="margin:0 auto;">RESERVE has no server, no account system, and no ads. Your food log, your weight, your journey — all of it lives on your phone and nowhere else.</p>
+    <div class="chips">
+      <span class="chip"><b>0</b> accounts</span>
+      <span class="chip"><b>0</b> ads</span>
+      <span class="chip"><b>0</b> trackers</span>
+      <span class="chip"><b>0</b> data sold — ever</span>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="tagline rv">See your fuel · Spend your reserve</div>
+  <h2 class="rv">Meet your metabolism.</h2>
+  <p class="lead rv" style="margin:16px auto 34px;">Free on the App Store. Thirty seconds to your first glance.</p>
+  <a class="store-badge rv" href="https://apps.apple.com/app/id6772624785" aria-label="Download on the App Store">
+    <svg width="200" height="66" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg" role="img">
+      <rect x="1" y="1" width="178" height="58" rx="12" fill="#000" stroke="#a6a6a6" stroke-width="1.4"/>
+      <g fill="#fff">
+        <path d="M37.4 30.6c0-3.6 2.9-5.3 3.1-5.4-1.7-2.5-4.3-2.8-5.3-2.8-2.2-.2-4.4 1.3-5.5 1.3-1.1 0-2.9-1.3-4.8-1.3-2.4 0-4.7 1.4-5.9 3.6-2.6 4.4-.7 11 1.8 14.6 1.2 1.8 2.7 3.7 4.6 3.6 1.8-.1 2.5-1.2 4.8-1.2s2.9 1.2 4.8 1.1c2-.1 3.3-1.8 4.5-3.6 1.4-2 2-4 2-4.1-.1 0-3.9-1.5-4.1-5.8zM33.7 19.8c1-1.2 1.7-2.9 1.5-4.6-1.4.1-3.2 1-4.2 2.2-.9 1-1.8 2.8-1.5 4.4 1.6.1 3.2-.8 4.2-2z"/>
+        <text x="52" y="24" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text',Helvetica,Arial,sans-serif" font-size="11" fill="#fff">Download on the</text>
+        <text x="52" y="44" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display',Helvetica,Arial,sans-serif" font-size="21" font-weight="600" fill="#fff">App Store</text>
+      </g>
+    </svg>
+  </a>
 </div>
+
+<footer>
+  <div class="foot-in">
+    <span>© 2026 RESERVE</span>
+    <a href="./press.html">Press Kit</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./support.html">Support</a>
+    <span class="sp">Made with ❤️ in San Diego</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ---- scroll reveal ----
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.14});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  // ---- hero ambience: soft glow pools + rising bubbles (the orb's world) ----
+  var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cv = document.getElementById('orbCanvas'), cx = cv.getContext('2d');
+  var W,H,DPR = Math.min(devicePixelRatio||1,2);
+  function size(){ W = cv.clientWidth; H = cv.clientHeight; cv.width = W*DPR; cv.height = H*DPR; cx.setTransform(DPR,0,0,DPR,0,0); }
+  size(); addEventListener('resize', size);
+
+  var bubbles = [];
+  for (var i=0;i<26;i++) bubbles.push({ x:Math.random(), y:Math.random(), r:1+Math.random()*2.6, s:.12+Math.random()*.3, drift:Math.random()*6.28 });
+
+  function frame(t){
+    t = t*0.001;
+    cx.clearRect(0,0,W,H);
+    var g1 = cx.createRadialGradient(W*.78,H*.42,0, W*.78,H*.42, Math.max(W,H)*.5);
+    g1.addColorStop(0,'rgba(79,217,138,.10)'); g1.addColorStop(1,'rgba(79,217,138,0)');
+    cx.fillStyle = g1; cx.fillRect(0,0,W,H);
+    var g2 = cx.createRadialGradient(W*.12,H*.85,0, W*.12,H*.85, Math.max(W,H)*.45);
+    g2.addColorStop(0,'rgba(255,153,51,.06)'); g2.addColorStop(1,'rgba(255,153,51,0)');
+    cx.fillStyle = g2; cx.fillRect(0,0,W,H);
+    cx.fillStyle = 'rgba(79,217,138,.35)';
+    bubbles.forEach(function(b){
+      var y = (b.y - t*b.s*0.05) % 1; if (y<0) y+=1;
+      var x = b.x + Math.sin(t*.4 + b.drift)*.012;
+      cx.globalAlpha = .12 + .3*(1-y);
+      cx.beginPath(); cx.arc(x*W, y*H, b.r, 0, 6.283); cx.fill();
+    });
+    cx.globalAlpha = 1;
+    if(!rm) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
