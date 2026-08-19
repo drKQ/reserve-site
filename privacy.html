@@ -36,7 +36,7 @@
   <section>
     <h2>What we collect</h2>
     <p>Reserve runs entirely on your device. The app does not have a server, an account system, or analytics. We do not collect your name, email, body weight, food logs, activity history, or anything else.</p>
-    <p>If you connect Apple Health, Reserve reads your weight and active-energy samples directly from HealthKit on this device. Those reads never leave your phone. We do not transmit them anywhere.</p>
+    <p>If you connect Apple Health, Reserve reads your weight and active-energy samples directly from HealthKit on this device. We do not transmit them anywhere. They do become part of your log, though &mdash; and your log is mirrored to your own private iCloud when iCloud is on, exactly as described under &ldquo;What we store&rdquo;. So an Apple Health reading can leave this phone, and when it does, your iCloud is the only place it goes.</p>
   </section>
 
   <section>
@@ -47,7 +47,22 @@
 
   <section>
     <h2>What we share</h2>
-    <p>Nothing. There is no third party we share data with. There is no advertising network. There is no &ldquo;trusted partners&rdquo; list. We do not sell, license, or transmit your data to anyone.</p>
+    <p>We do not sell, license, or trade your data. There is no advertising network, no analytics, no &ldquo;trusted partners&rdquo; list, and no server of ours for anything to be sent to.</p>
+    <p>Two outside services do receive something, and both are named here rather than buried: <strong>Sentry</strong>, which receives crash reports, and <strong>Open Food Facts</strong>, which receives a barcode number or the words you type when you search its online food database. Each is described in its own section below. Nothing else about you goes anywhere.</p>
+  </section>
+
+  <section>
+    <h2>Food search &amp; barcodes</h2>
+    <p>Reserve carries its own food database inside the app &mdash; about 38,000 foods and 30,000 barcodes &mdash; and it is checked first, offline, every time. Most lookups never touch the network at all.</p>
+    <p>When a scanned barcode is not in that database, or when you open the online search and type into it, that barcode number or that search text is sent to <a href="https://world.openfoodfacts.org">Open Food Facts</a>, an open food database, to look the product up. That is the whole of what is sent: a barcode, or the words you typed. Not your weight, not your log, not your name, not an identifier for you or your device. Reserve has no account there and cannot be linked back to you.</p>
+    <p>You can avoid it entirely: decline the online search, and enter the food by hand instead.</p>
+  </section>
+
+  <section>
+    <h2>Talking to Reserve</h2>
+    <p>On iPhones with Apple Intelligence, you can write or dictate a sentence like &ldquo;two eggs and a coffee&rdquo; and Reserve turns it into log entries. The sentence is read by Apple's on-device language model, which runs on your iPhone. We never see it, Apple's servers never see it, and it is never written to storage or added to your log. Reserve holds it only while that screen is open.</p>
+    <p>The model's only job is splitting your sentence into foods and amounts. It never produces a calorie or a macro &mdash; every number comes from the food database inside the app. On every other iPhone, the quick parser Reserve has always used does the same job, unchanged.</p>
+    <p>Reserve has no speech recognition of its own. When you dictate, you are using the iPhone keyboard's microphone key, and whether that audio is processed on your device or by Apple is an Apple setting (iOS Settings &rarr; General &rarr; Keyboard &rarr; Enable Dictation).</p>
   </section>
 
   <section>
@@ -77,7 +92,7 @@
     <p>For privacy questions or data requests, email <a href="mailto:briankq@icloud.com">briankq@icloud.com</a>.</p>
   </section>
 
-  <p class="updated">Last updated: June 2026</p>
+  <p class="updated">Last updated: August 2026</p>
   <footer><a href="./support.html">Support</a> &nbsp;·&nbsp; <a href="./index.html">Home</a></footer>
 </div>
 </body>
